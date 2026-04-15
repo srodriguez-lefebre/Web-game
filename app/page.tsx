@@ -1,5 +1,5 @@
-import { GameClient } from "@/components/game/game-client";
+import { GameHub } from "@/components/home/game-hub";
 
 export default function HomePage() {
-  return <GameClient />;
+  return <GameHub />;
 }

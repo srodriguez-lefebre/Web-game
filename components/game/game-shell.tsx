@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 type GameShellProps = {
@@ -9,6 +10,8 @@ type GameShellProps = {
   children: ReactNode;
   aside?: ReactNode;
   footer?: ReactNode;
+  backHref?: string;
+  backLabel?: string;
 };
 
 export function GameShell({
@@ -20,6 +23,8 @@ export function GameShell({
   children,
   aside,
   footer,
+  backHref,
+  backLabel = "Volver",
 }: GameShellProps) {
   const layoutClassName = aside
     ? "game-shell__layout"
@@ -30,6 +35,11 @@ export function GameShell({
       <section className="game-shell__surface">
         <header className="game-shell__topbar">
           <div>
+            {backHref ? (
+              <Link href={backHref} className="game-shell__backlink">
+                {backLabel}
+              </Link>
+            ) : null}
             <p className="game-shell__eyebrow">{eyebrow}</p>
             <div className="game-shell__title-row">
               <h1 className="game-shell__title">{title}</h1>

@@ -101,6 +101,8 @@ export function GameClient() {
       subtitle={headerSubtitle}
       phase={getPhaseLabel(state.phase)}
       status={roundSummary.currentPlayerName ?? roundSummary.nextAction}
+      backHref="/"
+      backLabel="Volver al arcade"
     >
       {state.lastError ? <ErrorStage message={state.lastError} /> : null}
 
@@ -432,7 +434,7 @@ function RevealStage({
       warning="Nadie deberia mirar esta pantalla salvo el jugador en turno."
     >
       <button type="button" className="button button--primary" onClick={onConfirm}>
-        Pasar el dispositivo
+        Siguiente
       </button>
     </RevealPanel>
   );

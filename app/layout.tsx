@@ -14,8 +14,11 @@ const bodyFont = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Interruptor",
-  description: "Juego web del impostor para jugar en pass & play.",
+  title: {
+    default: "Sala de juegos",
+    template: "%s | Sala de juegos",
+  },
+  description: "Coleccion de jueguitos web para jugar en local desde una misma pantalla.",
 };
 
 export default function RootLayout({
