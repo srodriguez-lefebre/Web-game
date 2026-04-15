@@ -511,8 +511,8 @@ function TimerStage({
         </div>
 
         <div className="game-panel__actions">
-          <button type="button" className="button button--secondary" onClick={onComplete}>
-            Cerrar ronda ahora
+          <button type="button" className="button button--danger" onClick={onComplete}>
+            Terminar
           </button>
         </div>
       </div>

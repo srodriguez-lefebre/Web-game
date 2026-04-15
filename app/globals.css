@@ -105,7 +105,7 @@ a {
 .game-shell__surface {
   position: relative;
   z-index: 1;
-  width: min(1400px, 100%);
+  width: min(1680px, 100%);
   margin: 0 auto;
   padding: 20px;
   border: 1px solid var(--line);
@@ -148,7 +148,7 @@ a {
 }
 
 .game-shell__subtitle {
-  max-width: 62ch;
+  max-width: 72ch;
   margin: 0;
   color: var(--muted);
   font-size: 1rem;
@@ -324,6 +324,11 @@ a {
   gap: 12px;
 }
 
+.game-panel__actions > :only-child {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .game-panel button,
 .game-panel .button {
   display: inline-flex;
@@ -396,7 +401,7 @@ a {
 }
 
 .game-panel__grid--compact {
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .metric-card,
@@ -807,15 +812,13 @@ a {
 }
 
 @media (min-width: 980px) {
-  .game-shell__topbar {
-    flex-direction: row;
-    align-items: end;
-    justify-content: space-between;
+  .game-shell__subtitle {
+    max-width: 78ch;
+    text-align: left;
   }
 
-  .game-shell__subtitle {
-    max-width: 54ch;
-    text-align: right;
+  .game-panel--setup .category-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
