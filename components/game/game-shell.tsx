@@ -12,6 +12,7 @@ type GameShellProps = {
   footer?: ReactNode;
   backHref?: string;
   backLabel?: string;
+  onBack?: () => void;
 };
 
 export function GameShell({
@@ -25,6 +26,7 @@ export function GameShell({
   footer,
   backHref,
   backLabel = "Volver",
+  onBack,
 }: GameShellProps) {
   const layoutClassName = aside
     ? "game-shell__layout"
@@ -37,7 +39,7 @@ export function GameShell({
           <div className="game-shell__topline">
             <p className="game-shell__eyebrow">{eyebrow}</p>
             {backHref ? (
-              <Link href={backHref} className="game-shell__backlink">
+              <Link href={backHref} className="game-shell__backlink" onClick={onBack}>
                 {backLabel}
               </Link>
             ) : null}

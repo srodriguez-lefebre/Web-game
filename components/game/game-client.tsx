@@ -130,6 +130,7 @@ export function GameClient() {
         subtitle="Recuperando la partida guardada para que no pierdas el estado al volver."
         backHref="/"
         backLabel="Volver al home"
+        onBack={resetEverything}
       >
         <section className="game-panel">
           <div className="game-panel__inner">
@@ -155,6 +156,7 @@ export function GameClient() {
       status={roundSummary.currentPlayerName ?? roundSummary.nextAction}
       backHref="/"
       backLabel="Volver al home"
+      onBack={resetEverything}
     >
       {state.lastError ? <ErrorStage message={state.lastError} /> : null}
 
