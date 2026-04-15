@@ -10,6 +10,7 @@ type RevealPanelProps = {
   category: string;
   secretLabel?: string;
   secretWord: string;
+  otherImpostors?: string[];
   instructions: string[];
   warning?: string;
   children?: ReactNode;
@@ -25,6 +26,7 @@ export function RevealPanel({
   category,
   secretLabel = "Tu palabra",
   secretWord,
+  otherImpostors,
   instructions,
   warning,
   children,
@@ -70,6 +72,20 @@ export function RevealPanel({
             Memoriza esta palabra, pasa el telefono y no la digas en voz alta.
           </p>
         </div>
+
+        <div className="game-panel__status-row">
+          <span className="status-pill">
+            <strong>Tema actual:</strong> {category}
+          </span>
+        </div>
+
+        {otherImpostors && otherImpostors.length > 0 ? (
+          <div className="game-panel__status-row">
+            <span className="status-pill status-pill--danger">
+              <strong>Tus complices:</strong> {otherImpostors.join(", ")}
+            </span>
+          </div>
+        ) : null}
 
         {children ? <div className="game-panel__actions">{children}</div> : null}
 

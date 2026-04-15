@@ -155,6 +155,7 @@ export interface VisibleRoleData {
   categoryName: string | null;
   secretWord: string | null;
   impostorName: string | null;
+  impostorNames: string[];
   instructions: string[];
   isCurrentPlayer: boolean;
   canProceed: boolean;

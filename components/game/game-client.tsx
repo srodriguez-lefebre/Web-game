@@ -502,6 +502,7 @@ function RevealStage({
       category={visibleRole.categoryName ?? "Sin categoria"}
       secretWord={visibleRole.secretWord ?? "No tienes palabra"}
       secretLabel={visibleRole.role === "impostor" ? "Tu informacion" : "Tu palabra"}
+      otherImpostors={visibleRole.impostorNames}
       instructions={visibleRole.instructions}
       warning="Nadie deberia mirar esta pantalla salvo el jugador en turno."
     >

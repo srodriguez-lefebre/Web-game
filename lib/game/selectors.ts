@@ -107,6 +107,7 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
       categoryName: category?.name ?? null,
       secretWord: null,
       impostorName: null,
+      impostorNames: [],
       instructions: ["No se encontro a este jugador."],
       isCurrentPlayer: false,
       canProceed: false,
@@ -131,6 +132,7 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
       categoryName: category?.name ?? null,
       secretWord: null,
       impostorName: null,
+      impostorNames: [],
       instructions: isCurrentPlayer
         ? ["Pasa el dispositivo al jugador correcto para continuar."]
         : ["Espera tu turno y pasa el dispositivo cuando te toque mirar tu rol."],
@@ -152,6 +154,11 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
     categoryName: round.categoryName,
     secretWord: isImpostor ? null : round.secretWord,
     impostorName: round.impostorName,
+    impostorNames: isImpostor
+      ? state.players
+          .filter((p) => round.impostorIds.includes(p.id) && p.id !== player.id)
+          .map((p) => p.name)
+      : [],
     instructions: isImpostor
       ? [
           "Sos el impostor.",
