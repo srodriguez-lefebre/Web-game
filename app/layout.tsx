@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Space_Grotesk } from "next/font/google";
 
 import "./globals.css";
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
     template: "%s | Sala de juegos",
   },
   description: "Coleccion de jueguitos web para jugar en local desde una misma pantalla.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

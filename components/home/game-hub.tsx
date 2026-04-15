@@ -43,7 +43,7 @@ export function GameHub() {
             <p className="hub-hero__subtitle">
               Una home real para ir sumando experiencias locales. Por ahora ya puedes entrar a
               <strong> Interruptor</strong>, y el resto de los cuadros queda listo para crecer sin
-              rediseñar todo despues.
+              redisenar todo despues.
             </p>
           </div>
 
@@ -57,52 +57,43 @@ export function GameHub() {
         <section className="hub-section">
           <div className="hub-section__header">
             <div>
-              <p className="hub-section__eyebrow">Destacado</p>
-              <h2 className="hub-section__title">Listo para jugar</h2>
-            </div>
-          </div>
-
-          <Link href={featuredGame.href} className="hub-card hub-card--featured">
-            <div className="hub-card__glow" />
-
-            <div className="hub-card__content">
-              <div className="hub-logo" aria-hidden="true">
-                <span className="hub-logo__ring" />
-                <span className="hub-logo__switch hub-logo__switch--left" />
-                <span className="hub-logo__switch hub-logo__switch--right" />
-                <span className="hub-logo__core" />
-              </div>
-
-              <div className="hub-card__copy">
-                <div className="hub-card__topline">
-                  <span className="hub-pill hub-pill--mint">{featuredGame.status}</span>
-                  <span className="hub-card__arrow">Entrar</span>
-                </div>
-
-                <h3 className="hub-card__title">{featuredGame.name}</h3>
-                <p className="hub-card__description">{featuredGame.description}</p>
-
-                <div className="hub-tag-row">
-                  {featuredGame.tags.map((tag) => (
-                    <span key={tag} className="hub-tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Link>
-        </section>
-
-        <section className="hub-section">
-          <div className="hub-section__header">
-            <div>
-              <p className="hub-section__eyebrow">Catalogo</p>
-              <h2 className="hub-section__title">Mas juegos en camino</h2>
+              <p className="hub-section__eyebrow">Juegos</p>
+              <h2 className="hub-section__title">Elige uno de los cuadros</h2>
             </div>
           </div>
 
           <div className="hub-grid">
+            <Link href={featuredGame.href} className="hub-card hub-card--featured">
+              <div className="hub-card__glow" />
+
+              <div className="hub-card__content">
+                <div className="hub-logo" aria-hidden="true">
+                  <span className="hub-logo__halo" />
+                  <span className="hub-logo__mask" />
+                  <span className="hub-logo__eye" />
+                  <span className="hub-logo__shine" />
+                </div>
+
+                <div className="hub-card__copy">
+                  <div className="hub-card__topline">
+                    <span className="hub-pill hub-pill--mint">{featuredGame.status}</span>
+                    <span className="hub-card__arrow">Entrar</span>
+                  </div>
+
+                  <h3 className="hub-card__title">{featuredGame.name}</h3>
+                  <p className="hub-card__description">{featuredGame.description}</p>
+
+                  <div className="hub-tag-row">
+                    {featuredGame.tags.map((tag) => (
+                      <span key={tag} className="hub-tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Link>
+
             {otherGames.map((game) => (
               <article key={game.id} className="hub-card hub-card--disabled">
                 <div className="hub-card__content">

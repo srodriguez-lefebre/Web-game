@@ -15,6 +15,7 @@ import type { GamePlayerInput, GameState, VisibleRoleData } from "@/lib/game/typ
 
 export function GameClient() {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialGameState);
+  const [storageLoaded, setStorageLoaded] = useState(false);
   const storageReadyRef = useRef(false);
   const skipNextSaveRef = useRef(true);
 
@@ -24,6 +25,7 @@ export function GameClient() {
 
   useEffect(() => {
     const savedState = loadGameState();
+    let frameId = 0;
 
     if (savedState) {
       dispatch({
@@ -33,10 +35,16 @@ export function GameClient() {
     }
 
     storageReadyRef.current = true;
+
+    frameId = window.requestAnimationFrame(() => {
+      setStorageLoaded(true);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
   }, []);
 
   useEffect(() => {
-    if (!storageReadyRef.current) {
+    if (!storageReadyRef.current || !storageLoaded) {
       return;
     }
 
@@ -46,7 +54,7 @@ export function GameClient() {
     }
 
     saveGameState(state);
-  }, [state]);
+  }, [state, storageLoaded]);
 
   const setPlayers = (players: GamePlayerInput[]) => {
     dispatch({
@@ -94,6 +102,30 @@ export function GameClient() {
       ? "Una sola pantalla por turno. Configura la mesa, reparte el dispositivo y prepara una ronda corta de conversacion."
       : "Todo se juega desde un solo dispositivo: revelar, hablar hasta que termine el tiempo y descubrir a los impostores.";
 
+  if (!storageLoaded) {
+    return (
+      <GameShell
+        eyebrow="Pass & play en espanol"
+        title="Interruptor"
+        subtitle="Recuperando la partida guardada para que no pierdas el estado al volver."
+        backHref="/"
+        backLabel="Volver al home"
+      >
+        <section className="game-panel">
+          <div className="game-panel__inner">
+            <header className="game-panel__header">
+              <p className="game-panel__eyebrow">Cargando</p>
+              <h2 className="game-panel__title">Recuperando partida</h2>
+              <p className="game-panel__copy">
+                Espera un instante mientras volvemos a cargar el estado guardado.
+              </p>
+            </header>
+          </div>
+        </section>
+      </GameShell>
+    );
+  }
+
   return (
     <GameShell
       eyebrow="Pass & play en espanol"
@@ -102,7 +134,7 @@ export function GameClient() {
       phase={getPhaseLabel(state.phase)}
       status={roundSummary.currentPlayerName ?? roundSummary.nextAction}
       backHref="/"
-      backLabel="Volver al arcade"
+      backLabel="Volver al home"
     >
       {state.lastError ? <ErrorStage message={state.lastError} /> : null}
 

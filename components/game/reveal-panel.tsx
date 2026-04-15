@@ -71,6 +71,8 @@ export function RevealPanel({
           </p>
         </div>
 
+        {children ? <div className="game-panel__actions">{children}</div> : null}
+
         <ul className="setup-card__list">
           {instructions.map((instruction) => (
             <li key={instruction}>{instruction}</li>
@@ -78,8 +80,6 @@ export function RevealPanel({
         </ul>
 
         {warning ? <p className="game-panel__copy">{warning}</p> : null}
-
-        {children ? <div className="game-panel__actions">{children}</div> : null}
       </div>
     </section>
   );

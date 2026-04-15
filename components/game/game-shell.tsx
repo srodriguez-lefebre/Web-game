@@ -34,19 +34,22 @@ export function GameShell({
     <main className="game-shell">
       <section className="game-shell__surface">
         <header className="game-shell__topbar">
-          <div>
+          <div className="game-shell__topline">
             {backHref ? (
               <Link href={backHref} className="game-shell__backlink">
                 {backLabel}
               </Link>
             ) : null}
             <p className="game-shell__eyebrow">{eyebrow}</p>
+          </div>
+
+          <div>
             <div className="game-shell__title-row">
               <h1 className="game-shell__title">{title}</h1>
             </div>
-          </div>
 
-          <p className="game-shell__subtitle">{subtitle}</p>
+            <p className="game-shell__subtitle">{subtitle}</p>
+          </div>
         </header>
 
         <div className="game-shell__status">
