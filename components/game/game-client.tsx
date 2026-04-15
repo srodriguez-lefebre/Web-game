@@ -509,6 +509,12 @@ function TimerStage({
             </p>
           </article>
         </div>
+
+        <div className="game-panel__actions">
+          <button type="button" className="button button--secondary" onClick={onComplete}>
+            Cerrar ronda ahora
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -105,7 +105,7 @@ a {
 .game-shell__surface {
   position: relative;
   z-index: 1;
-  width: min(1200px, 100%);
+  width: min(1400px, 100%);
   margin: 0 auto;
   padding: 20px;
   border: 1px solid var(--line);
@@ -775,6 +775,10 @@ a {
   .game-shell__layout {
     grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
     align-items: start;
+  }
+
+  .game-shell__layout--full {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .game-panel__inner {

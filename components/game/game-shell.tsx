@@ -21,6 +21,10 @@ export function GameShell({
   aside,
   footer,
 }: GameShellProps) {
+  const layoutClassName = aside
+    ? "game-shell__layout"
+    : "game-shell__layout game-shell__layout--full";
+
   return (
     <main className="game-shell">
       <section className="game-shell__surface">
@@ -40,7 +44,7 @@ export function GameShell({
           {status ? <span className="game-shell__badge">{status}</span> : null}
         </div>
 
-        <div className="game-shell__layout">
+        <div className={layoutClassName}>
           <div className="game-shell__stack">{children}</div>
 
           {aside ? <aside className="game-shell__rail">{aside}</aside> : null}
