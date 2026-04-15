@@ -17,10 +17,12 @@ export const MAX_GUESS_LENGTH = 64;
 
 export const DEFAULT_CLUE_SECONDS = 60;
 export const DEFAULT_VOTE_SECONDS = 45;
+export const DEFAULT_ROUND_MINUTES = 5;
 export const DEFAULT_TARGET_SCORE = 3;
 
 export const DEFAULT_GAME_CONFIG = {
   categoryId: null,
+  roundMinutes: DEFAULT_ROUND_MINUTES,
   clueSeconds: DEFAULT_CLUE_SECONDS,
   voteSeconds: DEFAULT_VOTE_SECONDS,
 } satisfies GameConfig;
@@ -28,6 +30,7 @@ export const DEFAULT_GAME_CONFIG = {
 export const GAME_PHASES: readonly GamePhase[] = [
   "setup",
   "reveal",
+  "timer",
   "clue",
   "vote",
   "tie_break",

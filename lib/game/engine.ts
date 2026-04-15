@@ -62,6 +62,27 @@ function createRoundId(state: GameState, roundNumber: number, categoryId: string
   return `round-${roundNumber}-${Math.floor(createSeededRng(seed)() * 1e9).toString(36)}`;
 }
 
+function revealAnswers(state: GameState): GameState {
+  if (!state.round) {
+    return setError(state, "No hay una ronda activa.");
+  }
+
+  const summary = buildRoundSummary(state.round);
+  const alreadyTracked = state.history.some((item) => item.roundId === summary.roundId);
+
+  return {
+    ...state,
+    phase: "round_result",
+    round: {
+      ...state.round,
+      currentTurnPlayerId: null,
+      timerEndsAt: state.round.timerEndsAt,
+    },
+    history: alreadyTracked ? state.history : [...state.history, summary],
+    lastError: null,
+  };
+}
+
 function finalizeRound(state: GameState, outcome: GameRoundOutcome): GameState {
   if (!state.round) {
     return setError(state, "No hay una ronda activa para finalizar.");
@@ -235,6 +256,7 @@ export function startRound(state: GameState, seed?: string): GameState {
     voteOrder,
     currentTurnIndex: 0,
     currentTurnPlayerId: revealOrder[0] ?? null,
+    timerEndsAt: null,
     revealIndex: 0,
     clueIndex: 0,
     revealedPlayerIds: [],
@@ -276,8 +298,8 @@ export function confirmReveal(state: GameState, playerId: string): GameState {
     : [...round.revealedPlayerIds, playerId];
   const nextIndex = round.currentTurnIndex + 1;
   const nextPlayerId = round.revealOrder[nextIndex] ?? null;
-  const nextPhase = nextPlayerId ? "reveal" : "clue";
-  const currentTurnPlayerId = nextPlayerId ?? round.clueOrder[0] ?? null;
+  const nextPhase = nextPlayerId ? "reveal" : "timer";
+  const currentTurnPlayerId = nextPlayerId ?? null;
 
   return {
     ...state,
@@ -287,6 +309,9 @@ export function confirmReveal(state: GameState, playerId: string): GameState {
       revealedPlayerIds,
       currentTurnIndex: nextPlayerId ? nextIndex : 0,
       currentTurnPlayerId,
+      timerEndsAt: nextPlayerId
+        ? round.timerEndsAt
+        : Date.now() + state.config.roundMinutes * 60 * 1000,
       revealIndex: nextPlayerId ? nextIndex : round.revealOrder.length - 1,
     },
     lastError: null,
@@ -461,4 +486,8 @@ export function summarizeRound(state: GameState): GameRoundSummary | null {
   }
 
   return buildRoundSummary(state.round);
+}
+
+export function finishRound(state: GameState): GameState {
+  return revealAnswers(state);
 }

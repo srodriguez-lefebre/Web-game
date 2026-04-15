@@ -109,6 +109,14 @@ export function validateGameConfig(state: GameState): ValidationIssue[] {
     });
   }
 
+  if (state.config.roundMinutes <= 0 || Number.isNaN(state.config.roundMinutes)) {
+    issues.push({
+      code: "invalid_round_minutes",
+      field: "config.roundMinutes",
+      message: "La duracion en minutos debe ser mayor a cero.",
+    });
+  }
+
   if (!category) {
     issues.push({
       code: "invalid_category",

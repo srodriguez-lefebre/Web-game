@@ -8,6 +8,7 @@ import {
 import { createGameSeed } from "./rng";
 import {
   confirmReveal,
+  finishRound,
   startNextRound,
   startRound,
   submitClue,
@@ -95,6 +96,24 @@ function normalizeHydratedState(state: GameState): GameState {
     ...(state.config ?? {}),
     categoryId: state.config?.categoryId ?? state.setup?.categoryId ?? CATEGORIES[0]?.id ?? null,
   };
+  const baseRound = state.round ?? state.currentRound ?? null;
+  const shouldResumeAsTimer =
+    baseRound !== null &&
+    ["clue", "vote", "tie_break", "tiebreak", "impostor_guess", "finalGuess"].includes(
+      state.phase ?? "",
+    );
+  const round =
+    baseRound === null
+      ? null
+      : {
+          ...baseRound,
+          currentTurnPlayerId: shouldResumeAsTimer ? null : baseRound.currentTurnPlayerId,
+          currentTurnIndex: shouldResumeAsTimer ? 0 : baseRound.currentTurnIndex,
+          timerEndsAt:
+            shouldResumeAsTimer && !baseRound.timerEndsAt
+              ? Date.now() + config.roundMinutes * 60 * 1000
+              : baseRound.timerEndsAt ?? null,
+        };
   const setup = {
     players,
     categoryId: config.categoryId,
@@ -112,12 +131,12 @@ function normalizeHydratedState(state: GameState): GameState {
     players,
     config,
     setup,
-    round: state.round ?? state.currentRound ?? null,
-    currentRound: state.round ?? state.currentRound ?? null,
+    round,
+    currentRound: round,
     history: Array.isArray(state.history) ? state.history : [],
     lastError: state.lastError ?? null,
     sessionSeed: state.sessionSeed || createGameSeed(),
-    phase: state.phase ?? "setup",
+    phase: shouldResumeAsTimer ? "timer" : state.phase ?? "setup",
   });
 }
 
@@ -349,6 +368,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return syncCompatState(submitImpostorGuess(clearError(currentState), action.guess));
     case "finalGuess/submit":
       return syncCompatState(submitImpostorGuess(clearError(currentState), action.payload.guess));
+    case "round/finish":
+      return syncCompatState(finishRound(clearError(currentState)));
     case "start_next_round":
       return syncCompatState(startNextRound(clearError(currentState), action.seed));
     case "round/next":

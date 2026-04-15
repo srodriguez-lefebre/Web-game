@@ -1,6 +1,7 @@
 export type GamePhase =
   | "setup"
   | "reveal"
+  | "timer"
   | "clue"
   | "vote"
   | "tie_break"
@@ -45,6 +46,7 @@ export interface GamePlayerInput {
 
 export interface GameConfig {
   categoryId: string | null;
+  roundMinutes: number;
   clueSeconds: number;
   voteSeconds: number;
 }
@@ -94,6 +96,7 @@ export interface GameRound {
   voteOrder: string[];
   currentTurnIndex: number;
   currentTurnPlayerId: string | null;
+  timerEndsAt: number | null;
   revealIndex: number;
   clueIndex: number;
   revealedPlayerIds: string[];
@@ -232,5 +235,6 @@ export type GameAction =
   | { type: "tiebreak/cast"; payload: { targetId: string } }
   | { type: "submit_impostor_guess"; guess: string }
   | { type: "finalGuess/submit"; payload: { guess: string } }
+  | { type: "round/finish" }
   | { type: "start_next_round"; seed?: string }
   | { type: "round/next" };

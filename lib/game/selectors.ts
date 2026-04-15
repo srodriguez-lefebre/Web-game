@@ -155,13 +155,13 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
     instructions: isImpostor
       ? [
           "Sos el impostor.",
-          "Escucha las pistas sin revelar que no conoces la palabra.",
-          "Si te expulsan, todavia tenes una ultima oportunidad.",
+          "Conoces la categoria, pero no la palabra secreta.",
+          "Mezclate en la conversacion sin revelar que te falta esa informacion.",
         ]
       : [
           "Sos un jugador normal.",
-          "Memorizala y pasale el dispositivo a la siguiente persona.",
-          "No la digas literal cuando toque dar tu pista.",
+          "Memoriza la palabra y pasale el dispositivo a la siguiente persona.",
+          "Durante la charla, no la digas literal ni la regales demasiado.",
         ],
     isCurrentPlayer,
     canProceed: isCurrentPlayer || revealToEveryone,
@@ -231,6 +231,8 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
 
   if (state.phase === "reveal") {
     nextAction = "Cada jugador debe mirar su rol.";
+  } else if (state.phase === "timer") {
+    nextAction = "El contador esta corriendo.";
   } else if (state.phase === "clue") {
     nextAction = "Es momento de dar pistas.";
   } else if (state.phase === "vote") {
@@ -240,7 +242,7 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
   } else if (state.phase === "impostor_guess" || state.phase === "finalGuess") {
     nextAction = "El impostor tiene una ultima oportunidad.";
   } else if (state.phase === "round_result" || state.phase === "result") {
-    nextAction = "La ronda termino. Podes empezar la siguiente.";
+    nextAction = "El tiempo termino. Podes empezar la siguiente ronda.";
   }
 
   let winningReason = "La ronda sigue abierta.";
