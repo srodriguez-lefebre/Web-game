@@ -662,6 +662,12 @@ a {
   border-style: dashed;
 }
 
+.status-pill--blue {
+  border-color: rgba(99, 179, 237, 0.3);
+  background: rgba(99, 179, 237, 0.12);
+  color: #bee3f8;
+}
+
 .game-panel__actions {
   display: grid;
   gap: 12px;

@@ -371,6 +371,7 @@ function SetupStage({
           <div className="game-panel__status-row">
             <span className="status-pill status-pill--accent">Minimo {MIN_PLAYERS}</span>
             <span className="status-pill status-pill--mint">Maximo {MAX_PLAYERS}</span>
+            <span className="status-pill status-pill--blue">Actuales {state.players.length}</span>
           </div>
 
           <div className="game-panel__actions">
