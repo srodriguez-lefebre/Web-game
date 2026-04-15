@@ -163,6 +163,12 @@ export function GameClient() {
               config,
             })
           }
+          onImpostorCountChange={(impostorCount) =>
+            dispatch({
+              type: "setup/setImpostorCount",
+              payload: impostorCount,
+            })
+          }
           onStart={() => dispatch({ type: "start_round" })}
         />
       ) : null}
@@ -249,6 +255,7 @@ function SetupStage({
   onPlayerNameChange,
   onCategoryChange,
   onConfigChange,
+  onImpostorCountChange,
   onStart,
 }: {
   state: GameState;
@@ -256,13 +263,134 @@ function SetupStage({
   onPlayerNameChange: (playerId: string, name: string) => void;
   onCategoryChange: (categoryId: string) => void;
   onConfigChange: (config: { clueSeconds?: number; voteSeconds?: number }) => void;
+  onImpostorCountChange: (impostorCount: number) => void;
   onStart: () => void;
 }) {
+  const maxImpostors = Math.max(1, state.players.length - 1);
+
   return (
     <>
+      <section className="game-panel">
+        <div className="game-panel__inner">
+          <header className="game-panel__header">
+            <p className="game-panel__eyebrow">Configuracion</p>
+            <h2 className="game-panel__title">Prepara la partida y arranca</h2>
+            <p className="game-panel__copy">
+              Ajusta el ritmo de la ronda, revisa la mesa y empieza cuando todo
+              este listo.
+            </p>
+          </header>
+
+          <div className="game-panel__status-row">
+            <span className="status-pill status-pill--accent">
+              {state.players.length} jugadores
+            </span>
+            <span className="status-pill status-pill--mint">
+              {state.setup.impostorCount} impostor{state.setup.impostorCount > 1 ? "es" : ""}
+            </span>
+            <span className="status-pill status-pill--mint">
+              {state.config.clueSeconds}s pistas
+            </span>
+            <span className="status-pill">{state.config.voteSeconds}s voto</span>
+          </div>
+
+          <div className="game-panel__grid game-panel__grid--compact">
+            <label className="metric-card">
+              <p className="metric-card__label">Tema actual</p>
+              <select
+                value={state.config.categoryId ?? ""}
+                onChange={(event) => onCategoryChange(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              >
+                {CATEGORIES.map((category) => (
+                  <option
+                    key={category.id}
+                    value={category.id}
+                    className="bg-white text-slate-950"
+                  >
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="metric-card">
+              <p className="metric-card__label">Tiempo de pistas</p>
+              <select
+                value={state.config.clueSeconds}
+                onChange={(event) =>
+                  onConfigChange({
+                    clueSeconds: Number(event.target.value),
+                  })
+                }
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              >
+                {[30, 45, 60, 75, 90].map((value) => (
+                  <option
+                    key={value}
+                    value={value}
+                    className="bg-white text-slate-950"
+                  >
+                    {value} segundos
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="metric-card">
+              <p className="metric-card__label">Cantidad de impostores</p>
+              <select
+                value={state.setup.impostorCount}
+                onChange={(event) => onImpostorCountChange(Number(event.target.value))}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              >
+                {Array.from({ length: maxImpostors }, (_, index) => index + 1).map((value) => (
+                  <option
+                    key={value}
+                    value={value}
+                    className="bg-white text-slate-950"
+                  >
+                    {value} impostor{value > 1 ? "es" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="metric-card">
+              <p className="metric-card__label">Tiempo de voto</p>
+              <select
+                value={state.config.voteSeconds}
+                onChange={(event) =>
+                  onConfigChange({
+                    voteSeconds: Number(event.target.value),
+                  })
+                }
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+              >
+                {[20, 30, 45, 60].map((value) => (
+                  <option
+                    key={value}
+                    value={value}
+                    className="bg-white text-slate-950"
+                  >
+                    {value} segundos
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="game-panel__actions">
+            <button type="button" className="button button--primary" onClick={onStart}>
+              Iniciar partida
+            </button>
+          </div>
+        </div>
+      </section>
+
       <SetupPanel
         title="Arma la mesa y define el tono"
-        description="Elige una categoria tematica, ajusta el ritmo y prepara a los jugadores. Todo queda listo para arrancar sin dispositivos extra."
+        description="Elige la categoria que va a gobernar la ronda y define el tono de las pistas."
         playerCountValue={`${state.players.length} jugadores`}
         roundsValue={`${state.config.clueSeconds}s / ${state.config.voteSeconds}s`}
         categories={CATEGORIES.map((category, index) => ({
@@ -273,11 +401,7 @@ function SetupStage({
           selected: state.config.categoryId === category.id,
         }))}
         tip="Tip: con cuatro o cinco personas la experiencia se siente mas tensa y agil para una primera partida."
-      >
-        <button type="button" className="button button--primary" onClick={onStart}>
-          Empezar ronda
-        </button>
-      </SetupPanel>
+      />
 
       <section className="game-panel">
         <div className="game-panel__inner">
@@ -322,67 +446,26 @@ function SetupStage({
       <section className="game-panel">
         <div className="game-panel__inner">
           <header className="game-panel__header">
-            <p className="game-panel__eyebrow">Ajustes</p>
-            <h2 className="game-panel__title">Ritmo de la ronda</h2>
+            <p className="game-panel__eyebrow">Reglas</p>
+            <h2 className="game-panel__title">Como se juega esta ronda</h2>
             <p className="game-panel__copy">
-              El temporizador no bloquea la partida, pero ayuda a meter presion visual durante pistas y votos.
+              Estas reglas quedan al final para consultarlas rapido antes de empezar.
             </p>
           </header>
 
-          <div className="game-panel__grid game-panel__grid--compact">
-            <label className="metric-card">
-              <p className="metric-card__label">Tema actual</p>
-              <select
-                value={state.config.categoryId ?? ""}
-                onChange={(event) => onCategoryChange(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
-              >
-                {CATEGORIES.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="metric-card">
-              <p className="metric-card__label">Tiempo de pistas</p>
-              <select
-                value={state.config.clueSeconds}
-                onChange={(event) =>
-                  onConfigChange({
-                    clueSeconds: Number(event.target.value),
-                  })
-                }
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
-              >
-                {[30, 45, 60, 75, 90].map((value) => (
-                  <option key={value} value={value}>
-                    {value} segundos
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="metric-card">
-              <p className="metric-card__label">Tiempo de voto</p>
-              <select
-                value={state.config.voteSeconds}
-                onChange={(event) =>
-                  onConfigChange({
-                    voteSeconds: Number(event.target.value),
-                  })
-                }
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
-              >
-                {[20, 30, 45, 60].map((value) => (
-                  <option key={value} value={value}>
-                    {value} segundos
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <ul className="setup-card__list">
+            <li>
+              Habra entre 1 y {maxImpostors} impostores segun la configuracion, y ellos no
+              conoceran la palabra secreta.
+            </li>
+            <li>El resto vera la palabra y debera dar pistas sin decirla literal.</li>
+            <li>Despues de las pistas, todos votan en secreto al sospechoso.</li>
+            <li>Si hay empate, solo los empatados pasan a desempate.</li>
+            <li>
+              Si expulsan a un impostor, ese expulsado tiene una ultima chance para adivinar
+              la palabra.
+            </li>
+          </ul>
         </div>
       </section>
     </>
@@ -649,8 +732,11 @@ function ResultStage({
       highlight={getOutcomeHeadline(roundSummary.reason)}
       facts={[
         {
-          label: "Impostor",
-          value: roundSummary.impostorName ?? "Desconocido",
+          label: roundSummary.impostorNames.length > 1 ? "Impostores" : "Impostor",
+          value:
+            roundSummary.impostorNames.length > 0
+              ? roundSummary.impostorNames.join(", ")
+              : roundSummary.impostorName ?? "Desconocido",
         },
         {
           label: "Expulsado",

@@ -30,6 +30,8 @@ function buildRoundSummary(round: GameRound): GameRoundSummary {
     categoryId: round.categoryId,
     categoryName: round.categoryName,
     secretWord: round.secretWord,
+    impostorIds: round.impostorIds,
+    impostorNames: round.impostorNames,
     impostorId: round.impostorId,
     impostorName: round.impostorName,
     winner: round.outcome?.winner ?? null,
@@ -53,10 +55,6 @@ function setError(state: GameState, message: string): GameState {
 
 function ensureRound(state: GameState): GameRound | null {
   return state.round;
-}
-
-function buildRoundOrder(state: GameState, seed: string): GamePlayer[] {
-  return shuffle(getActivePlayers(state), createSeededRng(seed));
 }
 
 function createRoundId(state: GameState, roundNumber: number, categoryId: string): string {
@@ -83,7 +81,7 @@ function finalizeRound(state: GameState, outcome: GameRoundOutcome): GameState {
 
   const nextPlayers = state.players.map((player) => {
     if (outcome.winner === "impostor") {
-      if (player.id === resolvedRound.impostorId) {
+      if (resolvedRound.impostorIds.includes(player.id)) {
         return {
           ...player,
           score: player.score + 1,
@@ -93,7 +91,7 @@ function finalizeRound(state: GameState, outcome: GameRoundOutcome): GameState {
       return player;
     }
 
-    if (player.id !== resolvedRound.impostorId && player.isActive) {
+    if (!resolvedRound.impostorIds.includes(player.id) && player.isActive) {
       return {
         ...player,
         score: player.score + 1,
@@ -170,7 +168,7 @@ function resolveVotes(state: GameState, useTieBreakVotes: boolean): GameState {
       : pickOne(topCandidates, createSeededRng(deriveSeed(state.sessionSeed, round.roundNumber, "tie-break")));
 
   const eliminatedPlayer = state.players.find((player) => player.id === eliminatedPlayerId) ?? null;
-  const isImpostorEliminated = eliminatedPlayerId === round.impostorId;
+  const isImpostorEliminated = round.impostorIds.includes(eliminatedPlayerId);
 
   if (!eliminatedPlayer) {
     return setError(state, "No se pudo identificar al jugador eliminado.");
@@ -184,7 +182,7 @@ function resolveVotes(state: GameState, useTieBreakVotes: boolean): GameState {
         ...round,
         eliminatedPlayerId,
         currentTurnIndex: 0,
-        currentTurnPlayerId: round.impostorId,
+        currentTurnPlayerId: eliminatedPlayerId,
         finalGuess: null,
       },
       lastError: null,
@@ -212,10 +210,15 @@ export function startRound(state: GameState, seed?: string): GameState {
   const roundNumber = state.history.length + 1;
   const roundSeed = deriveSeed(state.sessionSeed, roundNumber, category.id, seed ?? "auto");
   const rng = createSeededRng(roundSeed);
-  const order = buildRoundOrder(state, roundSeed);
-  const impostor = order[0];
+  const activePlayers = getActivePlayers(state);
+  const impostors = shuffle(activePlayers, rng).slice(0, state.setup.impostorCount);
+  const impostorIds = impostors.map((player) => player.id);
+  const impostorNames = impostors.map((player) => player.name);
+  const leadImpostor = impostors[0];
   const secretWord = pickOne(category.words, rng);
-  const turnOrder = order.map((player) => player.id);
+  const revealOrder = shuffle(activePlayers, rng).map((player) => player.id);
+  const clueOrder = shuffle(activePlayers, rng).map((player) => player.id);
+  const voteOrder = shuffle(activePlayers, rng).map((player) => player.id);
 
   const round: GameRound = {
     roundId: createRoundId(state, roundNumber, category.id),
@@ -223,13 +226,15 @@ export function startRound(state: GameState, seed?: string): GameState {
     categoryId: category.id,
     categoryName: category.name,
     secretWord,
-    impostorId: impostor.id,
-    impostorName: impostor.name,
-    revealOrder: turnOrder,
-    clueOrder: turnOrder,
-    voteOrder: turnOrder,
+    impostorIds,
+    impostorNames,
+    impostorId: leadImpostor.id,
+    impostorName: leadImpostor.name,
+    revealOrder,
+    clueOrder,
+    voteOrder,
     currentTurnIndex: 0,
-    currentTurnPlayerId: turnOrder[0] ?? null,
+    currentTurnPlayerId: revealOrder[0] ?? null,
     revealIndex: 0,
     clueIndex: 0,
     revealedPlayerIds: [],

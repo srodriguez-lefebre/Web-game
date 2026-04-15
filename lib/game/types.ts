@@ -54,6 +54,7 @@ export interface GameSetupState {
   categoryId: string | null;
   targetScore: number;
   revealCategoryToImpostor: boolean;
+  impostorCount: number;
 }
 
 export interface GameClue {
@@ -84,6 +85,8 @@ export interface GameRound {
   categoryId: string;
   categoryName: string;
   secretWord: string;
+  impostorIds: string[];
+  impostorNames: string[];
   impostorId: string;
   impostorName: string;
   revealOrder: string[];
@@ -112,6 +115,8 @@ export interface GameRoundSummary {
   categoryId: string;
   categoryName: string;
   secretWord: string;
+  impostorIds: string[];
+  impostorNames: string[];
   impostorId: string;
   impostorName: string;
   winner: RoundWinner | null;
@@ -183,6 +188,7 @@ export interface RoundSummaryView {
   currentPlayerName: string | null;
   nextAction: string;
   category: GameCategory | null;
+  impostorNames: string[];
   impostor: GamePlayer | null;
   eliminated: GamePlayer | null;
   champion: GamePlayer | null;
@@ -205,6 +211,7 @@ export type GameAction =
   | { type: "setup/setTargetScore"; payload: number }
   | { type: "setup/toggleRevealCategory"; payload: boolean }
   | { type: "setup/setCategory"; payload: string }
+  | { type: "setup/setImpostorCount"; payload: number }
   | {
       type: "update_player";
       playerId: string;

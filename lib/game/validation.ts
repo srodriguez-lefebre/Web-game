@@ -3,6 +3,7 @@ import {
   MAX_GUESS_LENGTH,
   MAX_PLAYER_NAME_LENGTH,
   MAX_PLAYERS,
+  DEFAULT_IMPOSTOR_COUNT,
   MIN_CLUE_LENGTH,
   MIN_GUESS_LENGTH,
   MIN_PLAYER_NAME_LENGTH,
@@ -135,6 +136,19 @@ export function validateCanStartRound(state: GameState): ValidationIssue[] {
       code: "too_few_players",
       field: "players",
       message: `Necesitas al menos ${MIN_PLAYERS} jugadores para empezar.`,
+    });
+  }
+
+  const maxImpostors = Math.max(DEFAULT_IMPOSTOR_COUNT, state.players.length - 1);
+
+  if (
+    state.setup.impostorCount < DEFAULT_IMPOSTOR_COUNT ||
+    state.setup.impostorCount > maxImpostors
+  ) {
+    issues.push({
+      code: "invalid_impostor_count",
+      field: "setup.impostorCount",
+      message: `La cantidad de impostores debe estar entre 1 y ${maxImpostors}.`,
     });
   }
 

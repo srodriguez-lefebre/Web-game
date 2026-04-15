@@ -51,7 +51,7 @@ export function getCurrentPlayer(state: GameState): GamePlayer | null {
   }
 
   if (state.phase === "impostor_guess" || state.phase === "finalGuess") {
-    return getPlayerById(state, state.round.impostorId);
+    return getPlayerById(state, state.round.eliminatedPlayerId ?? state.round.impostorId);
   }
 
   return getPlayerById(state, state.round.currentTurnPlayerId);
@@ -140,7 +140,7 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
     };
   }
 
-  const isImpostor = round.impostorId === player.id;
+  const isImpostor = round.impostorIds.includes(player.id);
   const visibleRole = isImpostor ? "impostor" : "civilian";
 
   return {
@@ -180,6 +180,8 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
         categoryId: round.categoryId,
         categoryName: round.categoryName,
         secretWord: round.secretWord,
+        impostorIds: round.impostorIds,
+        impostorNames: round.impostorNames,
         impostorId: round.impostorId,
         impostorName: round.impostorName,
         winner: round.outcome?.winner ?? null,
@@ -218,6 +220,7 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
       currentPlayerName: currentPlayer?.name ?? null,
       nextAction: "Configurando la partida.",
       category,
+      impostorNames: [],
       impostor: null,
       eliminated: null,
       champion: null,
@@ -263,7 +266,9 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
       state.phase === "round_result" || state.phase === "result" ? summary.secretWord : null,
     impostorId: summary.impostorId,
     impostorName:
-      state.phase === "round_result" || state.phase === "result" ? summary.impostorName : null,
+      state.phase === "round_result" || state.phase === "result"
+        ? summary.impostorNames.join(", ")
+        : null,
     winner: summary.winner,
     reason: summary.reason,
     winningReason,
@@ -278,6 +283,7 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
     currentPlayerName: currentPlayer?.name ?? null,
     nextAction,
     category,
+    impostorNames: summary.impostorNames,
     impostor: getPlayerById(state, summary.impostorId),
     eliminated: getPlayerById(state, summary.eliminatedPlayerId),
     champion: null,

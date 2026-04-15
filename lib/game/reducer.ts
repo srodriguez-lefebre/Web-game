@@ -1,5 +1,10 @@
 import { CATEGORIES } from "@/data/categories";
-import { DEFAULT_TARGET_SCORE, DEFAULT_GAME_CONFIG, GAME_STATE_VERSION } from "./constants";
+import {
+  DEFAULT_GAME_CONFIG,
+  DEFAULT_IMPOSTOR_COUNT,
+  DEFAULT_TARGET_SCORE,
+  GAME_STATE_VERSION,
+} from "./constants";
 import { createGameSeed } from "./rng";
 import {
   confirmReveal,
@@ -49,11 +54,17 @@ function normalizePlayers(players: GamePlayer[]): GamePlayer[] {
 }
 
 function buildSetup(state: GameState, players: GamePlayer[]): GameSetupState {
+  const maxImpostors = Math.max(DEFAULT_IMPOSTOR_COUNT, players.length - 1);
+
   return {
     players,
     categoryId: state.config.categoryId,
     targetScore: state.setup?.targetScore ?? DEFAULT_TARGET_SCORE,
     revealCategoryToImpostor: state.setup?.revealCategoryToImpostor ?? false,
+    impostorCount: Math.min(
+      maxImpostors,
+      Math.max(DEFAULT_IMPOSTOR_COUNT, state.setup?.impostorCount ?? DEFAULT_IMPOSTOR_COUNT),
+    ),
   };
 }
 
@@ -89,6 +100,10 @@ function normalizeHydratedState(state: GameState): GameState {
     categoryId: config.categoryId,
     targetScore: state.setup?.targetScore ?? DEFAULT_TARGET_SCORE,
     revealCategoryToImpostor: state.setup?.revealCategoryToImpostor ?? false,
+    impostorCount: Math.min(
+      Math.max(DEFAULT_IMPOSTOR_COUNT, players.length - 1),
+      Math.max(DEFAULT_IMPOSTOR_COUNT, state.setup?.impostorCount ?? DEFAULT_IMPOSTOR_COUNT),
+    ),
   };
 
   return syncCompatState({
@@ -123,6 +138,7 @@ export function createInitialGameState(): GameState {
       categoryId: CATEGORIES[0]?.id ?? null,
       targetScore: DEFAULT_TARGET_SCORE,
       revealCategoryToImpostor: false,
+      impostorCount: DEFAULT_IMPOSTOR_COUNT,
     },
     round: null,
     currentRound: null,
@@ -231,6 +247,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return updateSetupField(currentState, { targetScore: action.payload });
     case "setup/toggleRevealCategory":
       return updateSetupField(currentState, { revealCategoryToImpostor: action.payload });
+    case "setup/setImpostorCount":
+      return updateSetupField(currentState, { impostorCount: action.payload });
     case "setup/setCategory":
       return syncCompatState({
         ...currentState,
