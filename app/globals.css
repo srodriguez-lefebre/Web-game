@@ -145,15 +145,6 @@ a {
   letter-spacing: -0.05em;
 }
 
-.hub-hero__subtitle {
-  max-width: 74ch;
-  margin: 0;
-  color: var(--muted);
-  font-size: 1.02rem;
-  line-height: 1.75;
-}
-
-.hub-hero__badge,
 .hub-tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -462,6 +453,7 @@ a {
   display: inline-flex;
   align-items: center;
   width: fit-content;
+  margin-left: auto;
   padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1183,8 +1175,8 @@ a {
 
 @media (min-width: 980px) {
   .hub-hero {
-    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-    align-items: end;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
   }
 
   .hub-grid {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 
 import { GameShell } from "@/components/game/game-shell";
 import { ResultPanel } from "@/components/game/result-panel";
@@ -18,10 +18,15 @@ export function GameClient() {
   const [storageLoaded, setStorageLoaded] = useState(false);
   const storageReadyRef = useRef(false);
   const skipNextSaveRef = useRef(true);
+  const latestStateRef = useRef(state);
 
   const currentPlayer = getCurrentPlayer(state);
   const roundSummary = getRoundSummary(state);
   const visibleRole = currentPlayer ? getVisibleRoleData(state, currentPlayer.id) : null;
+
+  useLayoutEffect(() => {
+    latestStateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     const savedState = loadGameState();
@@ -55,6 +60,16 @@ export function GameClient() {
 
     saveGameState(state);
   }, [state, storageLoaded]);
+
+  useEffect(() => {
+    return () => {
+      if (!storageReadyRef.current) {
+        return;
+      }
+
+      saveGameState(latestStateRef.current);
+    };
+  }, []);
 
   const setPlayers = (players: GamePlayerInput[]) => {
     dispatch({

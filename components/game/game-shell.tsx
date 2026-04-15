@@ -35,12 +35,12 @@ export function GameShell({
       <section className="game-shell__surface">
         <header className="game-shell__topbar">
           <div className="game-shell__topline">
+            <p className="game-shell__eyebrow">{eyebrow}</p>
             {backHref ? (
               <Link href={backHref} className="game-shell__backlink">
                 {backLabel}
               </Link>
             ) : null}
-            <p className="game-shell__eyebrow">{eyebrow}</p>
           </div>
 
           <div>

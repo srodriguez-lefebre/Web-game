@@ -40,17 +40,6 @@ export function GameHub() {
           <div className="hub-hero__copy">
             <p className="hub-hero__eyebrow">Arcade casero</p>
             <h1 className="hub-hero__title">Elige un jueguito y arranca</h1>
-            <p className="hub-hero__subtitle">
-              Una home real para ir sumando experiencias locales. Por ahora ya puedes entrar a
-              <strong> Interruptor</strong>, y el resto de los cuadros queda listo para crecer sin
-              redisenar todo despues.
-            </p>
-          </div>
-
-          <div className="hub-hero__badge">
-            <span className="hub-pill hub-pill--accent">Juegos locales</span>
-            <span className="hub-pill">Web</span>
-            <span className="hub-pill">En construccion</span>
           </div>
         </header>
 
