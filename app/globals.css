@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #09111f;
+  --bg-soft: #111c31;
+  --card: rgba(10, 17, 31, 0.78);
+  --card-strong: rgba(17, 28, 49, 0.92);
+  --text: #f6f7fb;
+  --muted: #98a6c7;
+  --accent: #ffb84d;
+  --accent-2: #52e6c2;
+  --danger: #ff6b6b;
+  --ring: rgba(255, 184, 77, 0.35);
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.38);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-body), sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(82, 230, 194, 0.14), transparent 28%),
+    radial-gradient(circle at 20% 20%, rgba(255, 184, 77, 0.18), transparent 24%),
+    linear-gradient(180deg, #060b15 0%, var(--bg) 48%, #04070d 100%);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+}
+
+.hero {
+  width: min(720px, 100%);
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
+  background: linear-gradient(180deg, rgba(17, 28, 49, 0.95), rgba(9, 17, 31, 0.9));
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: var(--accent-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(3.2rem, 9vw, 5.8rem);
+  line-height: 0.95;
+}
+
+.lede {
+  max-width: 56ch;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.status-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: var(--card);
+}
+
+.status-card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 10px rgba(255, 184, 77, 0.14);
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .lede {
+    font-size: 0.98rem;
+  }
+}
