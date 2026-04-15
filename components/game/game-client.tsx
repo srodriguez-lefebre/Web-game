@@ -11,7 +11,12 @@ import { MAX_PLAYERS, MIN_PLAYERS } from "@/lib/game/constants";
 import { createInitialGameState, gameReducer } from "@/lib/game/reducer";
 import { getCurrentPlayer, getRoundSummary, getVisibleRoleData } from "@/lib/game/selectors";
 import { clearGameState, loadGameState, saveGameState } from "@/lib/storage";
-import type { GamePlayerInput, GameState, VisibleRoleData } from "@/lib/game/types";
+import type {
+  GamePlayerInput,
+  GameState,
+  ImpostorCountSetting,
+  VisibleRoleData,
+} from "@/lib/game/types";
 
 export function GameClient() {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialGameState);
@@ -238,10 +243,15 @@ function SetupStage({
   onPlayerNameChange: (playerId: string, name: string) => void;
   onCategoryChange: (categoryId: string) => void;
   onConfigChange: (config: { roundMinutes?: number }) => void;
-  onImpostorCountChange: (impostorCount: number) => void;
+  onImpostorCountChange: (impostorCount: ImpostorCountSetting) => void;
   onStart: () => void;
 }) {
   const maxImpostors = Math.max(1, state.players.length - 1);
+  const maxRandomImpostors = Math.max(1, Math.floor(state.players.length / 2));
+  const impostorCountLabel =
+    state.setup.impostorCount === "random"
+      ? `Aleatorio (1 a ${maxRandomImpostors})`
+      : `${state.setup.impostorCount} impostor${state.setup.impostorCount > 1 ? "es" : ""}`;
 
   return (
     <>
@@ -260,7 +270,7 @@ function SetupStage({
               {state.players.length} jugadores
             </span>
             <span className="status-pill status-pill--mint">
-              {state.setup.impostorCount} impostor{state.setup.impostorCount > 1 ? "es" : ""}
+              {impostorCountLabel}
             </span>
             <span className="status-pill status-pill--mint">
               {state.config.roundMinutes} min
@@ -314,10 +324,19 @@ function SetupStage({
             <label className="metric-card">
               <p className="metric-card__label">Cantidad de impostores</p>
               <select
-                value={state.setup.impostorCount}
-                onChange={(event) => onImpostorCountChange(Number(event.target.value))}
+                value={String(state.setup.impostorCount)}
+                onChange={(event) =>
+                  onImpostorCountChange(
+                    event.target.value === "random"
+                      ? "random"
+                      : Number(event.target.value),
+                  )
+                }
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
               >
+                <option value="random" className="bg-white text-slate-950">
+                  Aleatorio (1 a {maxRandomImpostors})
+                </option>
                 {Array.from({ length: maxImpostors }, (_, index) => index + 1).map((value) => (
                   <option
                     key={value}
@@ -408,6 +427,9 @@ function SetupStage({
             <li>
               Habra entre 1 y {maxImpostors} impostores segun la configuracion, y ellos no
               conoceran la palabra secreta.
+            </li>
+            <li>
+              Si eliges Aleatorio, la ronda sortea la cantidad entre 1 y {maxRandomImpostors}.
             </li>
             <li>
               El resto vera la palabra y tendra que conversar sin decirla literal para no regalar la ronda.

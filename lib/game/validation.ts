@@ -150,8 +150,9 @@ export function validateCanStartRound(state: GameState): ValidationIssue[] {
   const maxImpostors = Math.max(DEFAULT_IMPOSTOR_COUNT, state.players.length - 1);
 
   if (
-    state.setup.impostorCount < DEFAULT_IMPOSTOR_COUNT ||
-    state.setup.impostorCount > maxImpostors
+    state.setup.impostorCount !== "random" &&
+    (state.setup.impostorCount < DEFAULT_IMPOSTOR_COUNT ||
+      state.setup.impostorCount > maxImpostors)
   ) {
     issues.push({
       code: "invalid_impostor_count",

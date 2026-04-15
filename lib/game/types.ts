@@ -12,6 +12,7 @@ export type GamePhase =
   | "result";
 
 export type GameRole = "civilian" | "impostor";
+export type ImpostorCountSetting = number | "random";
 
 export type VisibleRole = "hidden" | GameRole;
 
@@ -56,7 +57,7 @@ export interface GameSetupState {
   categoryId: string | null;
   targetScore: number;
   revealCategoryToImpostor: boolean;
-  impostorCount: number;
+  impostorCount: ImpostorCountSetting;
 }
 
 export interface GameClue {
@@ -214,7 +215,7 @@ export type GameAction =
   | { type: "setup/setTargetScore"; payload: number }
   | { type: "setup/toggleRevealCategory"; payload: boolean }
   | { type: "setup/setCategory"; payload: string }
-  | { type: "setup/setImpostorCount"; payload: number }
+  | { type: "setup/setImpostorCount"; payload: ImpostorCountSetting }
   | {
       type: "update_player";
       playerId: string;

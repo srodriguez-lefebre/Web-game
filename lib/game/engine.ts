@@ -1,5 +1,5 @@
 import { CATEGORIES, getCategoryById } from "@/data/categories";
-import { createSeededRng, deriveSeed, pickOne, shuffle } from "./rng";
+import { createSeededRng, deriveSeed, pickOne, randomInt, shuffle } from "./rng";
 import {
   formatValidationIssues,
   normalizeGameText,
@@ -60,6 +60,16 @@ function ensureRound(state: GameState): GameRound | null {
 function createRoundId(state: GameState, roundNumber: number, categoryId: string): string {
   const seed = deriveSeed(state.sessionSeed, roundNumber, categoryId, "round");
   return `round-${roundNumber}-${Math.floor(createSeededRng(seed)() * 1e9).toString(36)}`;
+}
+
+function resolveImpostorCount(state: GameState, playerCount: number, rng: () => number) {
+  if (state.setup.impostorCount !== "random") {
+    return state.setup.impostorCount;
+  }
+
+  const maxRandomImpostors = Math.max(1, Math.floor(playerCount / 2));
+
+  return randomInt(rng, maxRandomImpostors) + 1;
 }
 
 function revealAnswers(state: GameState): GameState {
@@ -232,7 +242,8 @@ export function startRound(state: GameState, seed?: string): GameState {
   const roundSeed = deriveSeed(state.sessionSeed, roundNumber, category.id, seed ?? "auto");
   const rng = createSeededRng(roundSeed);
   const activePlayers = getActivePlayers(state);
-  const impostors = shuffle(activePlayers, rng).slice(0, state.setup.impostorCount);
+  const impostorCount = resolveImpostorCount(state, activePlayers.length, rng);
+  const impostors = shuffle(activePlayers, rng).slice(0, impostorCount);
   const impostorIds = impostors.map((player) => player.id);
   const impostorNames = impostors.map((player) => player.name);
   const leadImpostor = impostors[0];

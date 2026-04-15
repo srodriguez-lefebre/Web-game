@@ -16,7 +16,13 @@ import {
   submitVote,
 } from "./engine";
 import { normalizePlayerName } from "./validation";
-import type { GameAction, GamePlayer, GameSetupState, GameState } from "./types";
+import type {
+  GameAction,
+  GamePlayer,
+  GameSetupState,
+  GameState,
+  ImpostorCountSetting,
+} from "./types";
 
 function toLegacyPhase(phase: GameState["phase"]): GameState["phase"] {
   if (phase === "tie_break") {
@@ -54,17 +60,32 @@ function normalizePlayers(players: GamePlayer[]): GamePlayer[] {
     }));
 }
 
-function buildSetup(state: GameState, players: GamePlayer[]): GameSetupState {
-  const maxImpostors = Math.max(DEFAULT_IMPOSTOR_COUNT, players.length - 1);
+function normalizeImpostorCountSetting(
+  impostorCount: ImpostorCountSetting | undefined,
+  playerCount: number,
+): ImpostorCountSetting {
+  if (impostorCount === "random") {
+    return "random";
+  }
 
+  const maxImpostors = Math.max(DEFAULT_IMPOSTOR_COUNT, playerCount - 1);
+  const safeValue: number =
+    typeof impostorCount === "number" && Number.isFinite(impostorCount)
+      ? impostorCount
+      : DEFAULT_IMPOSTOR_COUNT;
+
+  return Math.min(maxImpostors, Math.max(DEFAULT_IMPOSTOR_COUNT, safeValue));
+}
+
+function buildSetup(state: GameState, players: GamePlayer[]): GameSetupState {
   return {
     players,
     categoryId: state.config.categoryId,
     targetScore: state.setup?.targetScore ?? DEFAULT_TARGET_SCORE,
     revealCategoryToImpostor: state.setup?.revealCategoryToImpostor ?? false,
-    impostorCount: Math.min(
-      maxImpostors,
-      Math.max(DEFAULT_IMPOSTOR_COUNT, state.setup?.impostorCount ?? DEFAULT_IMPOSTOR_COUNT),
+    impostorCount: normalizeImpostorCountSetting(
+      state.setup?.impostorCount,
+      players.length,
     ),
   };
 }
@@ -119,9 +140,9 @@ function normalizeHydratedState(state: GameState): GameState {
     categoryId: config.categoryId,
     targetScore: state.setup?.targetScore ?? DEFAULT_TARGET_SCORE,
     revealCategoryToImpostor: state.setup?.revealCategoryToImpostor ?? false,
-    impostorCount: Math.min(
-      Math.max(DEFAULT_IMPOSTOR_COUNT, players.length - 1),
-      Math.max(DEFAULT_IMPOSTOR_COUNT, state.setup?.impostorCount ?? DEFAULT_IMPOSTOR_COUNT),
+    impostorCount: normalizeImpostorCountSetting(
+      state.setup?.impostorCount,
+      players.length,
     ),
   };
 
