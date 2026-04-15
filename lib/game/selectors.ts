@@ -17,16 +17,40 @@ export function getPlayerById(state: GameState, playerId: string | null): GamePl
   return state.players.find((player) => player.id === playerId) ?? null;
 }
 
+function buildRoleCopy(role: "hidden" | "civilian" | "impostor") {
+  if (role === "impostor") {
+    return {
+      team: "impostor" as const,
+      roleLabel: "Impostor",
+      description: "No conoces la palabra y debes mezclarte sin quedar expuesto.",
+    };
+  }
+
+  if (role === "civilian") {
+    return {
+      team: "civilian" as const,
+      roleLabel: "Civil",
+      description: "Conoces la palabra y debes ayudar sin regalarla.",
+    };
+  }
+
+  return {
+    team: "hidden" as const,
+    roleLabel: "Oculto",
+    description: "Pasa el dispositivo para no revelar informacion.",
+  };
+}
+
 export function getCurrentPlayer(state: GameState): GamePlayer | null {
   if (!state.round) {
     return null;
   }
 
-  if (state.phase === "round_result" || state.phase === "setup") {
+  if (state.phase === "round_result" || state.phase === "setup" || state.phase === "result") {
     return null;
   }
 
-  if (state.phase === "impostor_guess") {
+  if (state.phase === "impostor_guess" || state.phase === "finalGuess") {
     return getPlayerById(state, state.round.impostorId);
   }
 
@@ -40,12 +64,12 @@ export function getVoteOptions(state: GameState): GameVoteOption[] {
 
   const currentPlayer = getCurrentPlayer(state);
   const currentPlayerId = currentPlayer?.id ?? null;
-  const allowedIds =
-    state.phase === "tie_break"
-      ? state.round.tieCandidates.filter((playerId) => playerId !== currentPlayerId)
-      : state.players
-          .filter((player) => player.isActive && player.id !== currentPlayerId)
-          .map((player) => player.id);
+  const inTieBreak = state.phase === "tie_break" || state.phase === "tiebreak";
+  const allowedIds = inTieBreak
+    ? state.round.tieCandidates.filter((playerId) => playerId !== currentPlayerId)
+    : state.players
+        .filter((player) => player.isActive && player.id !== currentPlayerId)
+        .map((player) => player.id);
 
   return allowedIds
     .map((playerId) => {
@@ -56,6 +80,7 @@ export function getVoteOptions(state: GameState): GameVoteOption[] {
       }
 
       return {
+        id: player.id,
         playerId: player.id,
         name: player.name,
         isCurrentPlayer: player.id === currentPlayerId,
@@ -70,6 +95,7 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
   const isCurrentPlayer = currentPlayer?.id === playerId;
   const category = getCategoryById(state.round?.categoryId ?? state.config.categoryId);
   const round = state.round;
+  const revealToEveryone = state.phase === "round_result" || state.phase === "result";
 
   if (!player) {
     return {
@@ -84,10 +110,10 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
       instructions: ["No se encontro a este jugador."],
       isCurrentPlayer: false,
       canProceed: false,
+      ...buildRoleCopy("hidden"),
     };
   }
 
-  const revealToEveryone = state.phase === "round_result";
   const revealToCurrentPlayer =
     !revealToEveryone &&
     isCurrentPlayer &&
@@ -110,15 +136,17 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
         : ["Espera tu turno y pasa el dispositivo cuando te toque mirar tu rol."],
       isCurrentPlayer,
       canProceed: isCurrentPlayer,
+      ...buildRoleCopy("hidden"),
     };
   }
 
   const isImpostor = round.impostorId === player.id;
+  const visibleRole = isImpostor ? "impostor" : "civilian";
 
   return {
     playerId: player.id,
     playerName: player.name,
-    role: isImpostor ? "impostor" : "civilian",
+    role: visibleRole,
     phase: state.phase,
     categoryId: round.categoryId,
     categoryName: round.categoryName,
@@ -137,13 +165,14 @@ export function getVisibleRoleData(state: GameState, playerId: string): VisibleR
         ],
     isCurrentPlayer,
     canProceed: isCurrentPlayer || revealToEveryone,
+    ...buildRoleCopy(visibleRole),
   };
 }
 
 export function getRoundSummary(state: GameState): RoundSummaryView {
   const round = state.round;
   const currentPlayer = getCurrentPlayer(state);
-  const category = getCategoryById(round?.categoryId ?? state.config.categoryId);
+  const category = getCategoryById(round?.categoryId ?? state.config.categoryId) ?? null;
   const summary: GameRoundSummary | null = round
     ? {
         roundId: round.roundId,
@@ -177,15 +206,21 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
       impostorName: null,
       winner: null,
       reason: null,
+      winningReason: "La partida todavia no empezo.",
       eliminatedPlayerId: null,
       eliminatedPlayerName: null,
       impostorGuess: null,
+      finalGuess: null,
       clueCount: 0,
       voteCount: 0,
       tieCandidates: [],
       currentPlayerId: currentPlayer?.id ?? null,
       currentPlayerName: currentPlayer?.name ?? null,
       nextAction: "Configurando la partida.",
+      category,
+      impostor: null,
+      eliminated: null,
+      champion: null,
     };
   }
 
@@ -197,12 +232,26 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
     nextAction = "Es momento de dar pistas.";
   } else if (state.phase === "vote") {
     nextAction = "Se esta votando al sospechoso.";
-  } else if (state.phase === "tie_break") {
+  } else if (state.phase === "tie_break" || state.phase === "tiebreak") {
     nextAction = "Hubo empate y ahora se desempata.";
-  } else if (state.phase === "impostor_guess") {
+  } else if (state.phase === "impostor_guess" || state.phase === "finalGuess") {
     nextAction = "El impostor tiene una ultima oportunidad.";
-  } else if (state.phase === "round_result") {
+  } else if (state.phase === "round_result" || state.phase === "result") {
     nextAction = "La ronda termino. Podes empezar la siguiente.";
+  }
+
+  let winningReason = "La ronda sigue abierta.";
+
+  if (summary.winner === "impostor") {
+    winningReason =
+      summary.reason === "correct_guess"
+        ? "El impostor adivino la palabra."
+        : "El impostor sobrevivio a la votacion.";
+  } else if (summary.winner === "civilians") {
+    winningReason =
+      summary.reason === "wrong_guess"
+        ? "La mesa atrapo al impostor y su intento fallo."
+        : "La mesa descubrio al impostor.";
   }
 
   return {
@@ -210,19 +259,27 @@ export function getRoundSummary(state: GameState): RoundSummaryView {
     roundNumber: summary.roundNumber,
     categoryId: summary.categoryId,
     categoryName: summary.categoryName,
-    secretWord: state.phase === "round_result" ? summary.secretWord : null,
+    secretWord:
+      state.phase === "round_result" || state.phase === "result" ? summary.secretWord : null,
     impostorId: summary.impostorId,
-    impostorName: state.phase === "round_result" ? summary.impostorName : null,
+    impostorName:
+      state.phase === "round_result" || state.phase === "result" ? summary.impostorName : null,
     winner: summary.winner,
     reason: summary.reason,
+    winningReason,
     eliminatedPlayerId: summary.eliminatedPlayerId,
     eliminatedPlayerName: summary.eliminatedPlayerName,
     impostorGuess: summary.impostorGuess,
+    finalGuess: summary.impostorGuess,
     clueCount: summary.clueCount,
     voteCount: summary.voteCount,
     tieCandidates: summary.tieCandidates,
     currentPlayerId: currentPlayer?.id ?? null,
     currentPlayerName: currentPlayer?.name ?? null,
     nextAction,
+    category,
+    impostor: getPlayerById(state, summary.impostorId),
+    eliminated: getPlayerById(state, summary.eliminatedPlayerId),
+    champion: null,
   };
 }

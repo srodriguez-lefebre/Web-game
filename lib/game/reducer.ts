@@ -107,17 +107,19 @@ function normalizeHydratedState(state: GameState): GameState {
 }
 
 export function createInitialGameState(): GameState {
+  const defaultPlayers = Array.from({ length: 4 }, (_, index) => createDefaultPlayer(index));
+
   return syncCompatState({
     version: GAME_STATE_VERSION,
     sessionSeed: createGameSeed(),
     phase: "setup",
-    players: [],
+    players: defaultPlayers,
     config: {
       ...DEFAULT_GAME_CONFIG,
       categoryId: CATEGORIES[0]?.id ?? null,
     },
     setup: {
-      players: [],
+      players: defaultPlayers,
       categoryId: CATEGORIES[0]?.id ?? null,
       targetScore: DEFAULT_TARGET_SCORE,
       revealCategoryToImpostor: false,
